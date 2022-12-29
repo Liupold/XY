@@ -3,7 +3,7 @@ MAKEFLAGS := --jobs=$(shell nproc)
 CC = gcc
 CFLAGS = -march=native -O3 -Wall -Wextra -Wpedantic -Ofast -fopenmp -Wconversion \
 		 -std=c99 -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual \
-		 -Wstrict-prototypes -Wdeclaration-after-statement -lm -mavx# -Werror
+		 -Wstrict-prototypes -Wdeclaration-after-statement -mavx -g# -Werror
 
 LIB_NAME = nd-xy
 DIR_EXPT = expt
@@ -15,13 +15,13 @@ src_progs := $(shell find $(DIR_EXPT) -name '*.c' | sed "s/.*\//$(DIR_BINs)\//; 
 xy-experiments: $(DIR_BINs) $(src_progs)
 
 $(DIR_LIB)/lib$(LIB_NAME).so: $(DIR_LIB)/nd-xy.c
-	$(CC) $(CFLAGS) -I$(DIR_INCLUDE) -shared $(DIR_LIB)/*.c -o $(DIR_LIB)/lib$(LIB_NAME).so
+	$(CC) $(CFLAGS) -I$(DIR_INCLUDE) -shared $(DIR_LIB)/*.c -lm -o $(DIR_LIB)/lib$(LIB_NAME).so
 
-$(DIR_BINs)/%: visual/%.c $(DIR_LIB)/lib$(LIB_NAME).so
-	$(CC) $(CFLAGS) -I$(DIR_INCLUDE) -L$(DIR_LIB) $< -l:lib$(LIB_NAME).so -lm -Wl,-rpath=$(realpath $(DIR_LIB)) -o $@ -lGL -lglut -lGLU
+$(DIR_BINs)/opengl_%: $(DIR_EXPT)/opengl_%.c $(DIR_LIB)/lib$(LIB_NAME).so
+	$(CC) $(CFLAGS) -pthread -I$(DIR_INCLUDE) -L$(DIR_LIB) $< -l:lib$(LIB_NAME).so -Wl,-rpath=$(realpath $(DIR_LIB)) -lm -lpthread -lGL -lGLU -lglut -o $@
 
 $(DIR_BINs)/%: $(DIR_EXPT)/%.c $(DIR_LIB)/lib$(LIB_NAME).so
-	$(CC) $(CFLAGS) -I$(DIR_INCLUDE) -L$(DIR_LIB) $< -l:lib$(LIB_NAME).so -lm -Wl,-rpath=$(realpath $(DIR_LIB)) -o $@
+	$(CC) $(CFLAGS) -I$(DIR_INCLUDE) -L$(DIR_LIB) $< -lm -l:lib$(LIB_NAME).so -Wl,-rpath=$(realpath $(DIR_LIB)) -o $@
 
 $(DIR_BINs):
 	mkdir -p $(DIR_BINs)

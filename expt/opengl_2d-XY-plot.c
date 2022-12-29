@@ -82,6 +82,7 @@ void draw_XY_lat(void) {
     }
     px += dpx;
   }
+  glFlush();
 }
 
 void display(int id) {  // Display function will draw the image.
@@ -90,7 +91,7 @@ void display(int id) {  // Display function will draw the image.
     glClear( GL_COLOR_BUFFER_BIT );
     draw_XY_lat();
     glutSwapBuffers(); // Required to copy color buffer onto the screen.
-    glutTimerFunc(2, display, 0);
+    glutTimerFunc(20, display, 0);
 }
 
 
@@ -100,30 +101,25 @@ int main( int argc, char** argv ) {  // Initialize GLUT and
 
   time(&ltime);
   lat = XY_init(2, 64);
-  r = xor256s_init(479242);
-
-  //r = xor256s_init((uint64_t) ltime);
-  //XY_rand(&lat, &r);
+  //r = xor256s_init(479242);
+  r = xor256s_init((uint64_t) ltime);
+  XY_rand(&lat, &r);
 
   // not for random.
-  r_angle = rand_uni(&r) * 2 * 3.14159;
-  for (uint64_t i = 0; i < lat.N; i++) {
-    lat.S[i] = r_angle; // all at same angle
-  }
+  //r_angle = rand_uni(&r) * 2 * 3.14159;
+  //for (uint64_t i = 0; i < lat.N; i++) {
+  //  lat.S[i] = r_angle; // all at same angle
+  //}
 
   glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_SINGLE);    // Use single color buffer and no depth buffer.
-  glutInitWindowSize(750,750);         // Size of display area, in pixels.
+  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
   glutInitWindowPosition(100,100);     // Location of window in screen coordinates.
+  glutInitWindowSize(750,750);         // Size of display area, in pixels.
   glutCreateWindow("F_TERM"); // Parameter is window title.
-  // clean and setup coord
-  //glMatrixMode(GL_PROJECTION);
-  //glLoadIdentity();
-  //gluOrtho2D(0, global_col, global_row, 0);
   glutDisplayFunc(draw_XY_lat);
   glutTimerFunc(0, display, 0);
   glutMainLoop(); // Run the event loop!  This function does not return.
                   // Program ends when user closes the window.
-  //XY_free(&lat);
+  XY_free(&lat);
   return 0;
 }

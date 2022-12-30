@@ -1,7 +1,7 @@
 #include <nd-xy.h>
 
 // ---------------------------------------------------
-double XY_dTheta(XY_lat *lat) {
+double XY_Theta_Variance(XY_lat *lat) {
   double del_th = 0;
   double th = 0;
   double tmp;
@@ -18,7 +18,7 @@ double XY_dTheta(XY_lat *lat) {
 }
 // ---------------------------------------------------
 
-double corr(XY_lat *lat, int del_ij_sq) {
+double XY_Theta_Deviation(XY_lat *lat, int del_ij_sq) {
   int *pos_i = (int *)calloc(lat->d, sizeof(int));
   int *pos_i_plus_j = (int *)calloc(lat->d, sizeof(int));
   int dist = 0, dist_x;
@@ -111,7 +111,8 @@ double corr_2d(XY_lat *lat, int j_sq) {
 
 int main(void) {
   // uint32_t r_arr[4] = {32, 64, 128, 256};
-  int j_max = 100, seed_avg = 20;
+  int j_max = 100;
+  uint32_t seed_avg = 20;
 
 #pragma omp parallel for
   for (int del_j2 = 1; del_j2 < j_max; del_j2 += 5) {
@@ -121,17 +122,18 @@ int main(void) {
     for (uint32_t sd = 0; sd < seed_avg; sd++) {
       xor256s_t seed = xor256s_init(183 + 78947 * sd);
       double c_m = -1, p_m;
-      //XY_rand(&lat, &seed);
+      // XY_rand(&lat, &seed);
       for (uint64_t i = 0; i < lat.N; i++) {
-        lat.S[i] = M_PI / 2 + 0.2 * (2 * rand_uni(&seed) - 1); // all at same angle
+        lat.S[i] =
+            M_PI / 2 + 0.2 * (2 * rand_uni(&seed) - 1); // all at same angle
       }
       do {
         p_m = c_m;
         XY_evolve(&lat, 1.0 / T, 10 * lat.N, J, 0, &seed);
-        c_m = XY_dTheta(&lat);
-      } while (fabs((c_m - p_m)/p_m) > 1E-3);
+        c_m = XY_Theta_Variance(&lat);
+      } while (fabs((c_m - p_m) / p_m) > 1E-3);
       for (uint32_t _ = 0; _ < 100; _++) {
-        th_C += corr(&lat, del_j2);
+        th_C += XY_Theta_Deviation(&lat, del_j2);
         XY_evolve(&lat, 1.0 / T, 1, J, 0, &seed);
       }
       if (th_C <= 0) {

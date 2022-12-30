@@ -35,7 +35,7 @@ double XY_dH(const XY_lat *lat, double *J, uint64_t i, double del_s) {
   // s2: new value @ i
   uint64_t pow_rk, idf, a, b;
   double dH = 0;
-  double com = lat->S[i] + del_s/2;
+  double com = lat->S[i] + del_s / 2;
 
   // printf("%d: ", i);
   // a, b : are the nearest neighbour in kth dimention.
@@ -57,7 +57,7 @@ double XY_dH(const XY_lat *lat, double *J, uint64_t i, double del_s) {
   }
   // printf("\n");
   // -(cos(φ + δφ - φj) - cos(φ - φj)) = 2 sin(δφ/2) sin(φ + δφ/2 - φj).
-  return 2 * dH * sin(del_s/2);
+  return 2 * dH * sin(del_s / 2);
 }
 
 void XY_evolve(XY_lat *lat, double beta, uint64_t steps, double *J, double h,
@@ -66,10 +66,9 @@ void XY_evolve(XY_lat *lat, double beta, uint64_t steps, double *J, double h,
   uint64_t i;
 
   for (uint64_t iter = 1; iter <= steps; iter++) {
-    //i = (i + rand_u64(r) % lat->r) % (lat->N); // choose i
+    // i = (i + rand_u64(r) % lat->r) % (lat->N); // choose i
     i = rand_u64(r) % (lat->N); // choose i
     del_s = (-1 + 2 * rand_uni(r)) * M_PI;
-
 
     del_H = XY_dH(lat, J, i, del_s) + h * cos(lat->S[i]);
     if (del_H > 0) { // Del E > 0
@@ -83,8 +82,8 @@ void XY_evolve(XY_lat *lat, double beta, uint64_t steps, double *J, double h,
       lat->S[i] -= 2 * M_PI;
     if (lat->S[i] < 0)
       lat->S[i] += 2 * M_PI;
-    //printf("del_H: %f\n", del_H);
-    // printf("%5.5f\r", (double)iter / (double)steps);
+    // printf("del_H: %f\n", del_H);
+    //  printf("%5.5f\r", (double)iter / (double)steps);
   }
 }
 // -------------------------------------------------------------
@@ -96,7 +95,7 @@ double XY_M2_N2(XY_lat *lat) {
   for (uint64_t i = 0; i < lat->N; i++) {
     M2 += sin(lat->S[i]);
   }
-  return ((pow(M1, 2) + pow(M2, 2)) / (double) (lat->N * lat->N));
+  return ((pow(M1, 2) + pow(M2, 2)) / (double)(lat->N * lat->N));
 }
 
 // -------------------------------------------------------------

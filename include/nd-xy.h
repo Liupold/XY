@@ -1,4 +1,7 @@
-#undef  _POSIX_C_SOURCE
+#ifndef NDXY_H
+#define NDXY_H
+
+#undef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 200809L
 #define M_PI 3.14159265358979323846
 
@@ -29,3 +32,4 @@ void XY_evolve(XY_lat *lat, double beta, uint64_t steps, double *J, double h,
 // -------------------------------------------------------------
 double XY_is_align(const XY_lat *lat, double *J, uint64_t i);
 
+#endif

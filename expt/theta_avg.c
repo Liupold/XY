@@ -22,9 +22,9 @@ int main(void) {
 
   XY_rand(&lat, &seed);
 
-  for (int j=0; j < 100; j++) {
+  for (int j = 0; j < 100; j++) {
     printf("%ld, %f\n", MC_steps, mean_Theta(&lat));
-    XY_evolve(&lat, 1.0/T, 1000 * 64 * 64, J, 0, &seed);
+    XY_evolve(&lat, 1.0 / T, 1000 * 64 * 64, J, 0, &seed);
     MC_steps += 1000;
   }
   XY_free(&lat);

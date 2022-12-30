@@ -33,7 +33,7 @@ void draw_arrow(GLfloat px, GLfloat py, GLfloat al, double th) {
   GLfloat alx = al/3;
   GLfloat aly = al;
   GLfloat theta = (GLfloat) th * 180.0f / (2.0f * 3.14159f);
-  theta += 90.0;
+  theta += 90.0f;
 
   glTranslatef(px, py, 0);
   glRotatef((GLfloat) theta, 0, 0, 1);
@@ -76,7 +76,7 @@ void draw_XY_lat(void) {
     py = dpx - 1;
     for (uint64_t j = 0; j < lat.r; j++) {
       COLOR = (GLfloat) lat.S[n] / (2 * 3.14159f);
-      draw_arrow(px, py, h * (1 + 0.5f * 0.25f * XY_is_align(&lat, J, n)), lat.S[n]);
+      draw_arrow(px, py, h * (1 + 0.5f * 0.25f * (GLfloat) XY_is_align(&lat, J, n)), lat.S[n]);
       py += dpx;
       n++;
     }
@@ -97,10 +97,10 @@ void display(int id) {  // Display function will draw the image.
 
 int main( int argc, char** argv ) {  // Initialize GLUT and
   time_t ltime;
-  double r_angle;
+  //double r_angle;
 
   time(&ltime);
-  lat = XY_init(2, 64);
+  lat = XY_init(2, 32);
   //r = xor256s_init(479242);
   r = xor256s_init((uint64_t) ltime);
   XY_rand(&lat, &r);

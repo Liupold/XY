@@ -114,29 +114,32 @@ int main(void) {
   int j_max = 100, seed_avg = 20;
 
 #pragma omp parallel for
-  for (int del_j2 = 1; del_j2 < j_max; del_j2++) {
+  for (int del_j2 = 1; del_j2 < j_max; del_j2 += 5) {
     double J[3] = {1.0, 1.0, 1.0};
     XY_lat lat = XY_init(2, 32);
     double th_C = 0, T = 0.2;
     for (uint32_t sd = 0; sd < seed_avg; sd++) {
-      xor256s_t seed = xor256s_init(9842 + 2874982 * sd);
+      xor256s_t seed = xor256s_init(183 + 78947 * sd);
       double c_m = -1, p_m;
-      XY_rand(&lat, &seed);
+      //XY_rand(&lat, &seed);
+      for (uint64_t i = 0; i < lat.N; i++) {
+        lat.S[i] = M_PI / 2 + 0.2 * (2 * rand_uni(&seed) - 1); // all at same angle
+      }
       do {
         p_m = c_m;
         XY_evolve(&lat, 1.0 / T, 10 * lat.N, J, 0, &seed);
         c_m = XY_dTheta(&lat);
-      } while (fabs(c_m - p_m) > 1E-2);
+      } while (fabs((c_m - p_m)/p_m) > 1E-3);
       for (uint32_t _ = 0; _ < 100; _++) {
         th_C += corr(&lat, del_j2);
-        XY_evolve(&lat, 1.0 / T, 100, J, 0, &seed);
+        XY_evolve(&lat, 1.0 / T, 1, J, 0, &seed);
       }
       if (th_C <= 0) {
         break;
       }
     }
     if (th_C > 0)
-      printf("%f, %f\n", log(del_j2), th_C / (1000 * seed_avg));
+      printf("%f, %f\n", log(sqrt(del_j2)), th_C / (100 * seed_avg));
     XY_free(&lat);
   }
   return 0;

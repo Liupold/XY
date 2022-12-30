@@ -1,10 +1,10 @@
 #include <GL/glut.h>
+#include <UI_tools.h>
 #include <math.h>
 #include <nd-xy.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <UI_tools.h>
 
 XY_lat lat;
 xor256s_t r;
@@ -12,6 +12,7 @@ double X = 0;
 uint64_t Count = 0;
 double T = 0.01;
 double J[3] = {1.0, 1.0, 1.0};
+uint64_t EVOLVE_STEP;
 float COLOR;
 
 double XY_dTheta(XY_lat *_lat) {
@@ -33,8 +34,8 @@ double XY_dTheta(XY_lat *_lat) {
 void draw_arrow(GLfloat px, GLfloat py, GLfloat al, double th) {
   GLfloat alx = al / 3;
   GLfloat aly = al;
-  GLfloat theta = (GLfloat)th * 180.0f / (2.0f * 3.14159f);
-  theta += 90.0f;
+  GLfloat theta = (GLfloat)th * 180.0f / (3.14159f);
+  // theta += 90.0f;
 
   glTranslatef(px, py, 0);
   glRotatef((GLfloat)theta, 0, 0, 1);
@@ -61,7 +62,7 @@ void draw_XY_lat(void) {
   GLfloat px = dpx - 1, py;
   uint64_t n = 0;
 
-  XY_evolve(&lat, 1 / T, 64 * lat.N, J, 0, &r);
+  XY_evolve(&lat, 1 / T, EVOLVE_STEP, J, 0, &r);
 
   // printf("\tMAG: %f, %f\r", T, XY_M2_N2(&lat));
   if (Count % 100 == 0) {
@@ -99,19 +100,29 @@ void display(int id) { // Display function will draw the image.
 
 int main(int argc, char **argv) { // Initialize GLUT and
   time_t ltime;
-  // double r_angle;
-  T = get_option_d(argc, argv, "-T", T);
   time(&ltime);
-  lat = XY_init(2, get_option_ul(argc, argv, "-L", 32));
 
-  // r = xor256s_init(479242);
+  // parse arguments
+  if (parse_help(argc, argv,
+                 "metropolis algorithm visualization for 2d XY model\n"
+                 "Writien By: Rohn Chatterjee (rohn.ch@gmail.com)\n\n"
+                 "-T \t <double> \t Temperature (k_B T / J)\n"
+                 "-L \t <uint> \t lattice size\n"
+                 "-Es \t <uint> \t Steps per frame.\n"))
+    exit(0);
+  T = parse_arg_d(argc, argv, "-T", T);
+  EVOLVE_STEP = parse_arg_ull(argc, argv, "-Es", 1);
+  lat = XY_init(2, parse_arg_ui(argc, argv, "-L", 32));
+
+  // RANDOM
   r = xor256s_init((uint64_t)ltime);
   XY_rand(&lat, &r);
 
+  // double r_angle;
   // not for random.
   // r_angle = rand_uni(&r) * 2 * 3.14159;
   // for (uint64_t i = 0; i < lat.N; i++) {
-  //  lat.S[i] = r_angle; // all at same angle
+  //  lat.S[i] = M_PI/2; // all at same angle
   //}
 
   glutInit(&argc, argv);

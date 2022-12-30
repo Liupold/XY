@@ -1,9 +1,9 @@
 MAKEFLAGS := --jobs=$(shell nproc)
 
 CC = gcc
-CFLAGS = -march=native -O3 -Wall -Wextra -Wpedantic -Ofast -fopenmp -Wconversion \
+CFLAGS = -march=native -flto -Wall -Wextra -Wpedantic -Ofast -fopenmp -Wconversion \
 		 -std=c99 -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual \
-		 -Wstrict-prototypes -Wdeclaration-after-statement -mavx -g# -Werror
+		 -Wstrict-prototypes -Wdeclaration-after-statement -mavx# -Werror
 
 LIB_NAME = nd-xy
 DIR_EXPT = expt

@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include <GL/glut.h>
 #include <UI_tools.h>
 #include <math.h>
@@ -35,7 +37,7 @@ void draw_arrow(GLfloat px, GLfloat py, GLfloat al, double th) {
   GLfloat alx = al / 2;
   GLfloat aly = al;
   GLfloat theta = (GLfloat)th * 180.0f / (3.14159f);
-  // theta += 90.0f;
+  theta += 90.0f;
 
   glTranslatef(px, py, 0);
   glRotatef((GLfloat)theta, 0, 0, 1);
@@ -98,7 +100,13 @@ void display(int id) { // Display function will draw the image.
 
 int main(int argc, char **argv) { // Initialize GLUT and
   time_t ltime;
+  char *conf_file = "/ssd_work/Assignment/msc-proj/tools/k=2_vortex.spin.conf";
+  FILE *fpr;
+  double th;
+  int flen = 0;
+
   time(&ltime);
+  r = xor256s_init((uint64_t)ltime);
 
   // parse arguments
   if (parse_help(argc, argv,
@@ -106,25 +114,25 @@ int main(int argc, char **argv) { // Initialize GLUT and
                  "Writien By: Rohn Chatterjee (rohn.ch@gmail.com)\n\n"
                  "-T \t <double> \t Temperature (k_B T / J)\n"
                  "-L \t <uint> \t lattice size\n"
-                 "-Es \t <uint> \t Steps per frame.\n"))
+                 "-Es \t <uint> \t Steps per frame.\n"
+                 "-f \t <filename> \t file containing spin conf \n"))
     exit(0);
   T = parse_arg_d(argc, argv, "-T", T);
   EVOLVE_STEP = parse_arg_ull(argc, argv, "-Es", 1);
-  lat = XY_init(2, parse_arg_ui(argc, argv, "-L", 32));
+  lat = XY_init(2, parse_arg_ui(argc, argv, "-L", 30));
 
-  // RANDOM
-  r = xor256s_init((uint64_t)ltime);
-
-  if (get_flag(argc, argv, "-nR")) {
-    for (uint64_t i = 0; i < lat.N; i++) {
-      lat.S[i] = M_PI/4 + 0.1 * rand_uni(&r); // all at same angle
-    }
+  conf_file = get_arg_param(argc, argv, "-f");
+  if (conf_file == NULL) {
+    printf("No confing file specified!");
+    exit(1);
   }
-  XY_true_rand(&lat, &r);
 
-  // double r_angle;
-  // not for random.
-  // r_angle = rand_uni(&r) * 2 * 3.14159;
+  fpr = fopen(conf_file, "r");
+  while (fscanf(fpr, "%lf", &th) > 0) {
+    lat.S[flen] = th;
+    flen += 1;
+  }
+  fclose(fpr);
 
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);

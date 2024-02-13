@@ -5,7 +5,7 @@ int main(void) {
 
 #pragma omp parallel for
   for (uint32_t t = 0; t < 100; t++) {
-    XY_lat lat = XY_init(2, 8);
+    XY_lat lat = XY_init(3, 8);
     double M = 0, T = 0.05 + (4.0 - 0.05) * 0.01 * t;
     xor256s_t r = xor256s_init(t * 908042 + 4888);
 

@@ -19,10 +19,17 @@ XY_lat XY_init(uint32_t d, uint32_t r) {
   return lat;
 }
 // -------------------------------------------------------------
-
 void XY_rand(XY_lat *lat, xor256s_t *r) {
+  const double delta = 0.2; // angle deviation
+  double rand_angle = (2*M_PI - delta) * rand_uni(r) - (M_PI - delta);
   for (uint64_t i = 0; i < lat->N; i++) {
-    lat->S[i] = rand_uni(r) * 2.0 * M_PI;
+    lat->S[i] = rand_angle + delta * (2*rand_uni(r) - 1);
+  }
+}
+
+void XY_true_rand(XY_lat *lat, xor256s_t *r) {
+  for (uint64_t i = 0; i < lat->N; i++) {
+    lat->S[i] = 2 * M_PI * rand_uni(r) - M_PI;
   }
 }
 
@@ -68,7 +75,7 @@ void XY_evolve(XY_lat *lat, double beta, uint64_t steps, double *J, double h,
   for (uint64_t iter = 1; iter <= steps; iter++) {
     // i = (i + rand_u64(r) % lat->r) % (lat->N); // choose i
     i = rand_u64(r) % (lat->N); // choose i
-    del_s = (-1 + 2 * rand_uni(r)) * M_PI;
+    del_s = 0.1 * (2 * rand_uni(r)  - 1) * M_PI;
 
     del_H = XY_dH(lat, J, i, del_s) + h * cos(lat->S[i]);
     if (del_H > 0) { // Del E > 0
@@ -78,9 +85,9 @@ void XY_evolve(XY_lat *lat, double beta, uint64_t steps, double *J, double h,
     }
     lat->S[i] += del_s;
 
-    if (lat->S[i] > 2 * M_PI)
+    if (lat->S[i] > M_PI)
       lat->S[i] -= 2 * M_PI;
-    if (lat->S[i] < 0)
+    if (lat->S[i] < -M_PI)
       lat->S[i] += 2 * M_PI;
     // printf("del_H: %f\n", del_H);
     //  printf("%5.5f\r", (double)iter / (double)steps);
